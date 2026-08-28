@@ -1,4 +1,4 @@
-import { IBuyer, TPayment } from "../../types/index.ts";
+import { IBuyer, TPayment, TBuyerErrors } from "../../types/index.ts";
 
 export class BuyerModel {
   private payment: TPayment | null;
@@ -12,7 +12,7 @@ export class BuyerModel {
     this.phone = '';
     this.address = '';
   }
-  public updateData(data: Partial<IBuyer>): void {
+  updateData(data: Partial<IBuyer>): void {
     if(data.payment !== undefined) {
       this.payment = data.payment
     }
@@ -26,37 +26,37 @@ export class BuyerModel {
       this.address = data.address
     }
   }
-  public getData(): IBuyer | null {
-    if (this.payment === null) {
-      return null;
-    }
-    return {
-      payment: this.payment,
-      email: this.email,
-      phone: this.phone,
-      address: this.address,
-    };
-  }
-  public clearData(): void {
+  getData(): IBuyer {
+  return {
+    payment: this.payment,
+    email: this.email,
+    phone: this.phone,
+    address: this.address,
+  };
+}
+
+  clearData(): void {
     this.payment = null;
     this.email = '';
     this.phone = '';
     this.address = '';
   }
-  public validate(): Record<keyof IBuyer, string> | {} {
-    const errors: Partial<Record<keyof IBuyer, string>> = {};
-    if(this.payment === null) {
+  
+  validate(): TBuyerErrors {
+    const errors: TBuyerErrors = {};
+
+    if (this.payment === null) {
       errors.payment = 'Выберите вид оплаты';
     }
-    if(this.email.length === 0) {
+    if (this.email.length === 0) {
       errors.email = 'Укажите ваш email';
     }
-    if(this.phone.length === 0) {
+    if (this.phone.length === 0) {
       errors.phone = 'Укажите номер телефона';
     }
-    if(this.address.length === 0) {
+    if (this.address.length === 0) {
       errors.address = 'Укажите адрес доставки';
     }
-    return errors
+    return errors;
   }
 }

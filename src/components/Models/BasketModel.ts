@@ -6,28 +6,28 @@ export class BasketModel {
   constructor() {
     this.items = [];
   }
-  public getItems(): IProduct[] {
+  getItems(): IProduct[] {
     return this.items;
   }
-  public addItem(item: IProduct): void {
+  addItem(item: IProduct): void {
     this.items.push(item);
   }
-  public removeItem(itemId: string): void {
+  removeItem(itemId: string): void {
     this.items = this.items.filter(item => item.id !== itemId);
   }
-  public clear(): void {
+  clear(): void {
     this.items = [];
   }
-  public getTotalPrice(): number {
+  getTotalPrice(): number {
     return this.items.reduce((total, item) => {
       const price = item.price ?? 0;
       return total + price;
     }, 0)
   }
-  public getCount(): number {
+  getCount(): number {
     return this.items.length;
   }
-  public includeItem(itemId: string): boolean {
+  hasItem(itemId: string): boolean {
     return this.items.some(item => item.id === itemId);
   }
 }
