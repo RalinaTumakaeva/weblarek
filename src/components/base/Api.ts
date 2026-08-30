@@ -19,14 +19,12 @@ export class Api implements IApi {
         if (response.ok) {
             return response.json() as Promise<T>;
         }
-        // Возвращаем ошибку в том же формате Promise<T>, чтобы типы совпадали
         return response.json().then(data => 
             Promise.reject(data.error ?? response.statusText)
         );
     }
 
     get<T = any>(uri: string): Promise<T> {
-        // Если нужны params, можно добавить их к URL здесь, пока игнорируем для простоты
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method: 'GET'

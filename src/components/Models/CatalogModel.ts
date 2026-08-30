@@ -8,19 +8,20 @@ export class CatalogModel {
     this.products = [];
     this.selectedProduct = null;
   }
-public saveProducts(products: IProduct[]): void {
+
+  saveProducts(products: IProduct[]): void {
     this.products = products;
   }
-public getProducts(): IProduct[] {
+  getProducts(): IProduct[] {
   return this.products;
 }
-public getProductById(id: string): IProduct | undefined {
+  getProductById(id: string): IProduct | undefined {
   return this.products.find(product => product.id === id);
 }
-public setSelectedProduct(product: IProduct): void {
+  setSelectedProduct(product: IProduct): void {
   this.selectedProduct = product;
 }
-public getSelectedProduct(): IProduct | null {
+  getSelectedProduct(): IProduct | null {
   return this.selectedProduct;
 }
 }

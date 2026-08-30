@@ -7,13 +7,13 @@ export class AppApi {
     this.api = api;
   }
 
-  // loadProducts — возвращает сразу массив товаров (items), как требует ТЗ
   public async loadProducts(): Promise<IProductsResponse['items']> {
-    const response = await this.api.get('/product/');
-    return response.items; // возвращаем только массив, а не весь конверт
+    const response = await this.api.get<IProductsResponse>('/product/');
+    return response.items; 
   }
 
   public async sendOrder(data: IOrderData): Promise<IOrderResponse> {
-    return this.api.post('/order/', data, 'POST');
+    return this.api.post<IOrderResponse>('/order/', data, 'POST');
   }
 }
+
