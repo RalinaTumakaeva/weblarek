@@ -4,7 +4,7 @@ import { BasketModel } from './components/Models/BasketModel.ts';
 import { CatalogModel } from './components/Models/CatalogModel.ts';
 import { AppApi } from './components/api/AppApi.ts';
 import { Api } from "./components/base/Api.ts";
-import { IApi } from './types/index.ts';      // <-- обязательно этот импорт
+import { IApi } from './types/index.ts';     
 import { API_URL } from './utils/constants.ts';
 import { apiProducts } from './utils/data.ts';
 

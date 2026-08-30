@@ -1,7 +1,6 @@
-import { IApi } from '../../types/index.ts';
 type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
-export class Api implements IApi {
+export class Api {
     readonly baseUrl: string;
     protected options: RequestInit;
 
@@ -16,32 +15,23 @@ export class Api implements IApi {
     }
 
     protected handleResponse<T>(response: Response): Promise<T> {
-        if (response.ok) {
-            return response.json() as Promise<T>;
-        }
-        return response.json().then(data => 
-            Promise.reject(data.error ?? response.statusText)
-        );
+        if (response.ok) return response.json();
+        else return response.json()
+            .then(data => Promise.reject(data.error ?? response.statusText));
     }
 
-    get<T = any>(uri: string): Promise<T> {
+    get<T extends object>(uri: string) {
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method: 'GET'
-        }).then(res => this.handleResponse<T>(res));
+        }).then(this.handleResponse<T>);
     }
 
-    post<T = any>(
-        uri: string, 
-        data: any, 
-        method?: 'POST' | 'PUT'
-    ): Promise<T> {
-        const httpMethod: ApiPostMethods = (method ?? 'POST') as ApiPostMethods;
-        
+    post<T extends object>(uri: string, data: object, method: ApiPostMethods = 'POST') {
         return fetch(this.baseUrl + uri, {
             ...this.options,
-            method: httpMethod,
+            method,
             body: JSON.stringify(data)
-        }).then(res => this.handleResponse<T>(res));
+        }).then(this.handleResponse<T>);
     }
 }

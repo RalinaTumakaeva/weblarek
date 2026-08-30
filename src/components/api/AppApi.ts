@@ -16,4 +16,3 @@ export class AppApi {
     return this.api.post<IOrderResponse>('/order/', data, 'POST');
   }
 }
-
