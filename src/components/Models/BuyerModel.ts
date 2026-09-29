@@ -1,62 +1,54 @@
-import { IBuyer, TPayment, TBuyerErrors } from "../../types/index.ts";
+import type { IBuyer, TPaymentModel, TBuyerErrors } from "../../types/index.ts";
+import { IEvents } from "../base/Events.ts";
 
 export class BuyerModel {
-  private payment: TPayment | null;
-  private email: string;
-  private phone: string;
-  private address: string;
+    private __payment: TPaymentModel | null = null;
+    private __address: string = '';
+    private __email: string = '';
+    private __phone: string = '';
 
-  constructor() {
-    this.payment = null;
-    this.email = '';
-    this.phone = '';
-    this.address = '';
-  }
-  updateData(data: Partial<IBuyer>): void {
-    if(data.payment !== undefined) {
-      this.payment = data.payment
-    }
-    if(data.email !== undefined) {
-      this.email = data.email
-    }
-    if(data.phone !== undefined) {
-      this.phone = data.phone
-    }
-    if(data.address !== undefined) {
-      this.address = data.address
-    }
-  }
-  getData(): IBuyer {
-  return {
-    payment: this.payment,
-    email: this.email,
-    phone: this.phone,
-    address: this.address,
-  };
-}
+    constructor(private events: IEvents) {}
 
-  clearData(): void {
-    this.payment = null;
-    this.email = '';
-    this.phone = '';
-    this.address = '';
-  }
-  
-  validate(): TBuyerErrors {
-    const errors: TBuyerErrors = {};
+    setData(data: Partial<IBuyer>): void {
+        if (data.address !== undefined) this.__address = data.address;
+        if (data.email !== undefined) this.__email = data.email;
+        if (data.phone !== undefined) this.__phone = data.phone;
+        if (data.payment !== undefined) this.__payment = data.payment;
+        this.events.emit('customer:changed');
+    }
 
-    if (this.payment === null) {
-      errors.payment = 'Выберите вид оплаты';
+    getData(): IBuyer {
+        return {
+            address: this.__address,
+            email: this.__email,
+            phone: this.__phone,
+            payment: this.__payment,
+        };
     }
-    if (this.email.length === 0) {
-      errors.email = 'Укажите ваш email';
+
+    clear(): void {
+        this.__address = '';
+        this.__email = '';
+        this.__phone = '';
+        this.__payment = null;
+        this.events.emit('customer:changed');
     }
-    if (this.phone.length === 0) {
-      errors.phone = 'Укажите номер телефона';
+
+    validate(): TBuyerErrors {
+        const errors: TBuyerErrors = {};
+
+        if (this.__address === '') {
+            errors.address = 'Укажите адрес';
+        }
+        if (this.__email === '') {
+            errors.email = 'Укажите email';
+        }
+        if (this.__phone === '') {
+            errors.phone = 'Укажите телефон';
+        }
+        if (this.__payment === null) {
+            errors.payment = 'Не выбран способ оплаты';
+        }
+        return errors;
     }
-    if (this.address.length === 0) {
-      errors.address = 'Укажите адрес доставки';
-    }
-    return errors;
-  }
 }

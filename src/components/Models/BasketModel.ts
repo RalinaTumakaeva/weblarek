@@ -1,33 +1,38 @@
-import { IProduct } from "../../types/index.ts";
-
+import type { IProduct } from "../../types/index.ts";
+import type { IEvents } from "../base/Events.ts";
 export class BasketModel {
-  private items: IProduct[] = [];
+   private _items: IProduct[] = [];
 
-  constructor() {
-    this.items = [];
-  }
-  getItems(): IProduct[] {
-    return this.items;
-  }
-  addItem(item: IProduct): void {
-    this.items.push(item);
-  }
-  removeItem(itemId: string): void {
-    this.items = this.items.filter(item => item.id !== itemId);
-  }
-  clear(): void {
-    this.items = [];
-  }
-  getTotalPrice(): number {
-    return this.items.reduce((total, item) => {
-      const price = item.price ?? 0;
-      return total + price;
-    }, 0)
-  }
-  getCount(): number {
-    return this.items.length;
-  }
-  hasItem(itemId: string): boolean {
-    return this.items.some(item => item.id === itemId);
-  }
+   constructor(private events: IEvents) {}
+
+    getItems(): IProduct[] {
+        return this._items;
+    }
+
+    addItem(item: IProduct): void {
+        this._items.push(item)
+        this.events.emit('basket:changed')
+    }
+
+    removeItem(itemId: string): void {
+    this._items = this._items.filter((item) => item.id !== itemId);
+    this.events.emit('basket:changed');
+}
+
+    clear(): void {
+        this._items = []
+        this.events.emit('basket:changed')
+    }
+
+    getTotalPrice(): number {
+        return this._items.reduce((acc, item) => acc + (item.price || 0), 0)
+    }
+
+    getCount(): number {
+        return this._items.length
+    }
+
+    hasItem(itemId: string): boolean {
+        return this._items.some(item => item.id === itemId)
+    }
 }
