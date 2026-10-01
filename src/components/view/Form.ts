@@ -1,12 +1,14 @@
 import { ensureElement } from '../../utils/utils.ts';
 import { Component } from "../base/Component.ts";
+import { TPayment } from '../../types/index.ts';
 
 interface IForm {
-    email?: string
-    phone?: string
-    address?: string
-    payment?: string
-    error: string
+    valid: boolean;
+    errors: string[];
+    address?: string;
+    payment?: TPayment;
+    email?: string;
+    phone?: string;
 }
 
 export class Form extends Component<IForm> {
@@ -19,8 +21,21 @@ export class Form extends Component<IForm> {
         this._errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
     }
 
-    set errors(errors: string[]) {
-        this._handleButton.disabled = errors.length > 0
-        this._errorElement.innerHTML = errors.join(', ')
+    set valid(value: boolean) {
+        this._handleButton.disabled = !value;
+    }
+
+    set errors(value: string[]) {
+        this._errorElement.innerHTML = value.join(', ');
+    }
+
+    render(data?: Partial<IForm>): HTMLElement {
+        if (data?.valid !== undefined) {
+            this.valid = data.valid;
+        }
+        if (data?.errors !== undefined) {
+            this.errors = data.errors;
+        }
+        return this.container;
     }
 }

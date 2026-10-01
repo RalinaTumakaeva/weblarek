@@ -1,5 +1,5 @@
 import { categoryMap, CDN_URL } from "../../utils/constants.ts";
-import { ensureElement } from '../../utils/utils.ts';
+import { ensureElement } from "../../utils/utils.ts";
 import { CardGeneral } from "./CardGeneral.ts";
 import type { ICardPreview } from "../../types/index.ts";
 import { IEvents } from "../base/Events.ts";
@@ -25,22 +25,48 @@ export class CardPreview extends CardGeneral {
         });
     }
 
-    set data(value: ICardPreview) {
-        super.data = value;
-        
-        this.setImage(this._imageElement, `${CDN_URL}/${value.image}`);
-        this._categoryElement.textContent = value.category;
-        this._categoryElement.className = `card__category ${categoryMap[value.category as CategoryKey]}`;
-        this._descriptionElement.textContent = value.description;
+    set image(url: string) {
+        const src = url.startsWith('http') ? url : `${CDN_URL}/${url}`;
+        super.setImage(this._imageElement, src);
+    }
 
-        if (value.price === null) {
-            this._buttonElement.disabled = true;
-            this._buttonElement.textContent = 'Недоступно';
-            return;
+    set category(value: string) {
+        this._categoryElement.textContent = value;
+        this._categoryElement.className = `card__category ${categoryMap[value as CategoryKey]}`;
+    }
+
+    set description(value: string) {
+        this._descriptionElement.textContent = value;
+    }
+
+    set buttonState(state: { text: string; disabled: boolean }) {
+        this._buttonElement.textContent = state.text;
+        this._buttonElement.disabled = state.disabled;
+    }
+
+    render(data?: Partial<ICardPreview>): HTMLElement {
+        if (data?.image !== undefined) {
+            this.image = data.image;
+        }
+        if (data?.category !== undefined) {
+            this.category = data.category;
+        }
+        if (data?.description !== undefined) {
+            this.description = data.description;
         }
 
-        const buttonText = value.inBasket ? 'Удалить из корзины' : 'В корзину';
-        this._buttonElement.textContent = buttonText;
-        this._buttonElement.disabled = false;
+        if (
+            data?.price !== undefined ||
+            data?.inBasket !== undefined
+        ) {
+            if (data.price === null) {
+                this.buttonState = { text: 'Недоступно', disabled: true };
+            } else {
+                const text = data.inBasket ? 'Удалить из корзины' : 'В корзину';
+                this.buttonState = { text, disabled: false };
+            }
+        }
+
+        return this.container;
     }
 }

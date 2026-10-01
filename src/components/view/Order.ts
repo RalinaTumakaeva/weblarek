@@ -1,11 +1,13 @@
 import { ensureElement } from '../../utils/utils.ts';
-import { IEvents } from "../base/Events.ts";
+import { IEvents } from '../base/Events.ts';
 import { Form } from './Form.ts';
 import type { TPayment } from '../../types/index.ts';
 
 interface IOrder {
-    address: string;
-    payment: TPayment;
+    valid?: boolean;
+    errors?: string[];
+    address?: string;
+    payment?: TPayment;
 }
 
 export class Order extends Form {
@@ -39,15 +41,36 @@ export class Order extends Form {
         });
     }
 
-    set data(value: IOrder) {
-        this._addressInput.value = value.address ?? '';
+    set address(value: string) {
+        this._addressInput.value = value ?? '';
+    }
+
+    set payment(value: TPayment) {
         this._cashButton.classList.remove('button_alt-active');
         this._cardButton.classList.remove('button_alt-active');
 
-        if (value.payment === 'card') {
+        if (value === 'card') {
             this._cardButton.classList.add('button_alt-active');
-        } else if (value.payment === 'cash') {
+        } else if (value === 'cash') {
             this._cashButton.classList.add('button_alt-active');
         }
+    }
+
+    render(data?: Partial<IOrder>): HTMLElement {
+        if (data?.valid !== undefined) {
+            this.valid = data.valid;
+        }
+        if (data?.errors !== undefined) {
+            this.errors = data.errors;
+        }
+
+        if (data?.address !== undefined) {
+            this.address = data.address;
+        }
+        if (data?.payment !== undefined) {
+            this.payment = data.payment;
+        }
+
+        return this.container;
     }
 }

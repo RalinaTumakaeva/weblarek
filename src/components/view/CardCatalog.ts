@@ -1,6 +1,6 @@
-import { categoryMap, CDN_URL } from "../../utils/constants.ts";
+import { categoryMap } from "../../utils/constants.ts";
 import { CardGeneral } from "./CardGeneral.ts";
-import { ensureElement } from '../../utils/utils.ts';
+import { ensureElement } from "../../utils/utils.ts";
 import type { ICardCatalog } from "../../types/index.ts";
 
 type CategoryKey = keyof typeof categoryMap;
@@ -20,12 +20,11 @@ export class CardCatalog extends CardGeneral {
     }
 
     set data(value: ICardCatalog) {
-        super.data = value;
+        this.setImage(this._imageElement, value.image);
 
-        this.setImage(this._imageElement, `${CDN_URL}/${value.image}`);
-        
         this._categoryElement.textContent = value.category;
         this._categoryElement.className = `card__category ${categoryMap[value.category as CategoryKey]}`;
-
     }
 }
+
+

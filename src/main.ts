@@ -17,7 +17,8 @@ import { Success } from './components/view/Success.ts';
 import { Order } from './components/view/Order.ts';
 import { Contacts } from './components/view/Contacts.ts';
 import { BasketCard } from './components/view/BasketCard.ts';
-import { Header } from './components/view/Header';
+import { Header } from './components/view/Header.ts';
+import { CDN_URL } from './utils/constants.ts';
 
 const events = new EventEmitter();
 const catalogModel = new CatalogModel(events);
@@ -41,13 +42,16 @@ function getBasketCards(): HTMLElement[] {
             () => events.emit('basket:delete', { id: item.id })
         );
         card.index = index + 1;
-        card.data = item;
+        card.render(item);
         return card.render();
     });
 }
 
 appApi.getProducts()
     .then(allProducts => {
+        allProducts.items.forEach(item => {
+            item.image = `${CDN_URL}/${item.image}`;
+        });
         catalogModel.setItems(allProducts.items);
     })
     .catch(error => {
@@ -78,10 +82,11 @@ events.on('catalog:selected', () => {
     if (!selectedItem) return;
 
     const inBasket = basketModel.hasItem(selectedItem.id);
-    cardPreview.data = {
+
+    cardPreview.render({
         ...selectedItem,
-        inBasket: inBasket
-    };
+        inBasket: inBasket,
+    });
 
     modal.open(cardPreview.render());
 });
@@ -95,7 +100,6 @@ events.on('preview:submit', () => {
     } else {
         basketModel.addItem(selectedItem);
     }
-
     modal.close();
 });
 
@@ -110,46 +114,54 @@ events.on('basket:delete', ({ id }: { id: string }) => {
 events.on('basket:changed', () => {
     header.counter = basketModel.getCount();
     const cards = getBasketCards();
-    basket.data = {
+    basket.render({
         list: cards,
         totalPrice: basketModel.getTotalPrice(),
         isOrderAvailable: basketModel.getCount() > 0
-    };
+    });
 });
 
 events.on('basket:submit', () => {
-    modal.close();
     const customerData = buyerModel.getData();
-    order.data = {
+
+    order.render({
         address: customerData.address,
-        payment: customerData.payment as TPayment
-    };
-    modal.open(order.render());
+        payment: customerData.payment as TPayment,
+    });
+
+    modal.setContent(order.render());
 });
+
 
 events.on('customer:changed', () => {
     const customerData = buyerModel.getData();
     
-    order.data = {
+    order.render({
         address: customerData.address,
         payment: customerData.payment as TPayment
-    };
+    });
 
     const errors = buyerModel.validate();
     const orderErrors: string[] = [];
     if (errors.payment) orderErrors.push(errors.payment);
     if (errors.address) orderErrors.push(errors.address);
+
     order.errors = orderErrors;
-    contacts.data = {
+    order.valid = orderErrors.length === 0;
+
+    contacts.render({
         email: customerData.email,
         phone: customerData.phone
-    };
+    });
 
     const contactErrors: string[] = [];
     if (errors.phone) contactErrors.push(errors.phone);
     if (errors.email) contactErrors.push(errors.email);
+
     contacts.errors = contactErrors;
+    contacts.valid = contactErrors.length === 0;
 });
+
 
 events.on('order:payment', (data: { payment: TPayment }) => {
     buyerModel.setData({ payment: data.payment });
@@ -168,8 +180,7 @@ events.on('contacts:email', (data: { email: string }) => {
 });
 
 events.on('order:submit', () => {
-    modal.open(contacts.render());
-    modal.close();
+    modal.setContent(contacts.render());
 });
 
 events.on('contacts:submit', async () => {

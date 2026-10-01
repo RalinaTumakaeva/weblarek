@@ -1,5 +1,5 @@
 import { ensureElement } from '../../utils/utils.ts';
-import { IEvents } from "../base/Events.ts";
+import { IEvents } from '../base/Events.ts';
 import { Form } from './Form.ts';
 
 interface IContactsData {

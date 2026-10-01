@@ -24,6 +24,11 @@ export interface IBuyer {
   payment: TPaymentModel;
 }
 
+export interface IForm {
+    valid: boolean;
+    errors: string[];
+}
+
 export interface IOrderData extends IBuyer {
   items: string[];
   total: number;
@@ -41,7 +46,6 @@ export interface IOrderResponse {
 
 export interface ICardGeneral {
   title: string;
-  id: string;
   price: number | null;
 }
 
