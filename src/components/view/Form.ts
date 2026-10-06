@@ -1,17 +1,8 @@
 import { ensureElement } from '../../utils/utils.ts';
 import { Component } from "../base/Component.ts";
-import { TPayment } from '../../types/index.ts';
+import type { IForm } from '../../types/index.ts';
 
-interface IForm {
-    valid: boolean;
-    errors: string[];
-    address?: string;
-    payment?: TPayment;
-    email?: string;
-    phone?: string;
-}
-
-export class Form extends Component<IForm> {
+export class Form<T> extends Component<IForm & T> {
     protected _handleButton: HTMLButtonElement;
     protected _errorElement: HTMLElement;
 
@@ -27,15 +18,5 @@ export class Form extends Component<IForm> {
 
     set errors(value: string[]) {
         this._errorElement.innerHTML = value.join(', ');
-    }
-
-    render(data?: Partial<IForm>): HTMLElement {
-        if (data?.valid !== undefined) {
-            this.valid = data.valid;
-        }
-        if (data?.errors !== undefined) {
-            this.errors = data.errors;
-        }
-        return this.container;
     }
 }

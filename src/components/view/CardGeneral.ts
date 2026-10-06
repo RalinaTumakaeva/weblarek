@@ -1,10 +1,9 @@
 import { Component } from "../base/Component.ts";
 import { ensureElement } from "../../utils/utils.ts";
-import type { ICardGeneral } from "../../types/index.ts";
 
-export class CardGeneral extends Component<ICardGeneral> {
-    private _priceElement: HTMLElement;
-    private _titleElement: HTMLElement;
+export class CardGeneral<T> extends Component<T> {
+    protected _titleElement: HTMLElement;
+    protected _priceElement: HTMLElement;
 
     constructor(container: HTMLElement) {
         super(container);
@@ -16,21 +15,14 @@ export class CardGeneral extends Component<ICardGeneral> {
         this._titleElement.textContent = value;
     }
 
-    set price(value: number | null) {
-        if (value === null || value === undefined) {
-            this._priceElement.textContent = 'Бесценно';
-        } else {
-            this._priceElement.textContent = `${value} синапсов`;
-        }
+    set price(value: number) {
+        this._priceElement.textContent = value > 0
+            ? `${value} синапсов`
+            : 'Бесценно';
     }
 
-    render(data?: Partial<ICardGeneral>): HTMLElement {
-        if (data?.title !== undefined) {
-            this.title = data.title;
-        }
-        if (data?.price !== undefined) {
-            this.price
-              }
-        return this.container;
+    protected setImage(el: HTMLImageElement, src: string): void {
+        el.src = src;
+        el.alt = '';
     }
 }

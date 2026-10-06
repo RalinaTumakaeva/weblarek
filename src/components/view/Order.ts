@@ -1,76 +1,46 @@
 import { ensureElement } from '../../utils/utils.ts';
 import { IEvents } from '../base/Events.ts';
 import { Form } from './Form.ts';
+import type { IOrderForm } from '../../types/index.ts';
 import type { TPayment } from '../../types/index.ts';
 
-interface IOrder {
-    valid?: boolean;
-    errors?: string[];
-    address?: string;
-    payment?: TPayment;
-}
-
-export class Order extends Form {
-    private _addressInput: HTMLInputElement;
-    private _cashButton: HTMLButtonElement;
-    private _cardButton: HTMLButtonElement;
+export class Order extends Form<IOrderForm> {
+    private _addressElement: HTMLInputElement;
+    private _paymentButtons: HTMLButtonElement[];
 
     constructor(container: HTMLFormElement, private events: IEvents) {
         super(container);
 
-        this._addressInput = ensureElement<HTMLInputElement>('.form__input[name="address"]', this.container);
-        this._cashButton = ensureElement<HTMLButtonElement>('button[name="cash"]', this.container);
-        this._cardButton = ensureElement<HTMLButtonElement>('button[name="card"]', this.container);
+        this._addressElement = ensureElement<HTMLInputElement>('.form__input[name="address"]', this.container);
+        this._paymentButtons = Array.from(
+            this.container.querySelectorAll<HTMLButtonElement>('.button_alt')
+        );
+
+        this._addressElement.addEventListener('input', (event) => {
+            const target = event.target as HTMLInputElement;
+            this.events.emit('order:address', { address: target.value.trim() });
+        });
+
+        this._paymentButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                this.payment = button.name as TPayment;
+                this.events.emit('order:payment', { payment: button.name as TPayment });
+            });
+        });
 
         this.container.addEventListener('submit', (event) => {
             event.preventDefault();
             this.events.emit('order:submit');
         });
-
-        this._addressInput.addEventListener('input', (event) => {
-            const target = event.target as HTMLInputElement;
-            this.events.emit('order:address', { address: target.value.trim() });
-        });
-
-        this._cashButton.addEventListener('click', () => {
-            this.events.emit('order:payment', { payment: 'cash' });
-        });
-
-        this._cardButton.addEventListener('click', () => {
-            this.events.emit('order:payment', { payment: 'card' });
-        });
     }
 
     set address(value: string) {
-        this._addressInput.value = value ?? '';
+        this._addressElement.value = value ?? '';
     }
 
     set payment(value: TPayment) {
-        this._cashButton.classList.remove('button_alt-active');
-        this._cardButton.classList.remove('button_alt-active');
-
-        if (value === 'card') {
-            this._cardButton.classList.add('button_alt-active');
-        } else if (value === 'cash') {
-            this._cashButton.classList.add('button_alt-active');
-        }
-    }
-
-    render(data?: Partial<IOrder>): HTMLElement {
-        if (data?.valid !== undefined) {
-            this.valid = data.valid;
-        }
-        if (data?.errors !== undefined) {
-            this.errors = data.errors;
-        }
-
-        if (data?.address !== undefined) {
-            this.address = data.address;
-        }
-        if (data?.payment !== undefined) {
-            this.payment = data.payment;
-        }
-
-        return this.container;
+        this._paymentButtons.forEach((button) => {
+            button.classList.toggle('button_alt-active', button.name === value);
+        });
     }
 }

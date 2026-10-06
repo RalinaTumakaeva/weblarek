@@ -29,6 +29,16 @@ export interface IForm {
     errors: string[];
 }
 
+export interface IOrderForm {
+    address: string;
+    payment: TPayment;
+}
+
+export interface IContactsForm {
+    email: string;
+    phone: string;
+}
+
 export interface IOrderData extends IBuyer {
   items: string[];
   total: number;
@@ -49,6 +59,10 @@ export interface ICardGeneral {
   price: number | null;
 }
 
+export interface IBasketCard extends ICardGeneral {
+    index: number;
+}
+
 export interface ICardCatalog extends ICardGeneral {
   category: string;
   image: string;
@@ -59,6 +73,8 @@ export interface ICardPreview extends ICardGeneral {
   description: string;
   image: string;
   inBasket?: boolean;
+  buttonText: string;
+  buttonDisabled: boolean;
 }
 
 

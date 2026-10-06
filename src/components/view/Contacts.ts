@@ -1,13 +1,9 @@
 import { ensureElement } from '../../utils/utils.ts';
 import { IEvents } from '../base/Events.ts';
 import { Form } from './Form.ts';
+import type { IContactsForm } from '../../types/index.ts';
 
-interface IContactsData {
-    email: string;
-    phone: string;
-}
-
-export class Contacts extends Form {
+export class Contacts extends Form<IContactsForm> {
     private _emailElement: HTMLInputElement;
     private _phoneElement: HTMLInputElement;
 
@@ -16,6 +12,7 @@ export class Contacts extends Form {
 
         this._emailElement = ensureElement<HTMLInputElement>('.form__input[name="email"]', this.container);
         this._phoneElement = ensureElement<HTMLInputElement>('.form__input[name="phone"]', this.container);
+
         this._phoneElement.addEventListener('input', (event) => {
             const target = event.target as HTMLInputElement;
             this.events.emit('contacts:phone', { phone: target.value.trim() });
@@ -32,8 +29,11 @@ export class Contacts extends Form {
         });
     }
 
-    set data(value: IContactsData) {
-        this._emailElement.value = value.email ?? '';
-        this._phoneElement.value = value.phone ?? '';
+    set email(value: string) {
+        this._emailElement.value = value ?? '';
+    }
+
+    set phone(value: string) {
+        this._phoneElement.value = value ?? '';
     }
 }

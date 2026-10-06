@@ -64,8 +64,15 @@ events.on('catalog:changed', () => {
             cloneTemplate(ensureElement<HTMLTemplateElement>('#card-catalog')),
             () => events.emit('card:selected', { id: item.id })
         );
-        card.data = item;
-        return card.render();
+
+        card.image = item.image; 
+        
+        card.category = item.category;
+        
+        card.title = item.title;
+        card.price = item.price ?? 0; 
+
+        return card.element; 
     });
     gallery.catalog = items;
 });
@@ -83,12 +90,31 @@ events.on('catalog:selected', () => {
 
     const inBasket = basketModel.hasItem(selectedItem.id);
 
+    let buttonText: string;
+    let isDisabled = false;
+
+    if (selectedItem.price === null) {
+        buttonText = 'Недоступно';
+        isDisabled = true;
+    } else if (inBasket) {
+        buttonText = 'Удалить из корзины';
+        isDisabled = false;
+    } else {
+        buttonText = 'В корзину';
+        isDisabled = false;
+    }
+
     cardPreview.render({
-        ...selectedItem,
+        category: selectedItem.category,
+        description: selectedItem.description,
+        image: selectedItem.image, // уже полный URL
         inBasket: inBasket,
+        
+        buttonText,
+        buttonDisabled: isDisabled,
     });
 
-    modal.open(cardPreview.render());
+    modal.open(cardPreview.element); 
 });
 
 events.on('preview:submit', () => {
@@ -132,13 +158,12 @@ events.on('basket:submit', () => {
     modal.setContent(order.render());
 });
 
-
 events.on('customer:changed', () => {
     const customerData = buyerModel.getData();
-    
+
     order.render({
         address: customerData.address,
-        payment: customerData.payment as TPayment
+        payment: customerData.payment as TPayment,
     });
 
     const errors = buyerModel.validate();
@@ -151,7 +176,7 @@ events.on('customer:changed', () => {
 
     contacts.render({
         email: customerData.email,
-        phone: customerData.phone
+        phone: customerData.phone,
     });
 
     const contactErrors: string[] = [];
@@ -161,7 +186,6 @@ events.on('customer:changed', () => {
     contacts.errors = contactErrors;
     contacts.valid = contactErrors.length === 0;
 });
-
 
 events.on('order:payment', (data: { payment: TPayment }) => {
     buyerModel.setData({ payment: data.payment });
@@ -184,7 +208,6 @@ events.on('order:submit', () => {
 });
 
 events.on('contacts:submit', async () => {
-    modal.close();
     try {
         const customerData = buyerModel.getData();
         const orderData: IOrderData = {
@@ -197,10 +220,23 @@ events.on('contacts:submit', async () => {
         };
 
         const result = await appApi.postOrder(orderData);
+
         success.total = result.total;
-        modal.open(success.render());
+        modal.setContent(success.render());
+
         basketModel.clear();
         buyerModel.clear();
+
+        contacts.email = '';
+        contacts.phone = '';
+
+        order.address = '';
+        order.payment = '' as TPayment;
+
+        order.valid = true;
+        order.errors = [];
+        contacts.valid = true;
+        contacts.errors = [];
     } catch (error) {
         console.error('Ошибка при оформлении заказа:', error);
     }

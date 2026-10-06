@@ -5,12 +5,13 @@ import type { ICardCatalog } from "../../types/index.ts";
 
 type CategoryKey = keyof typeof categoryMap;
 
-export class CardCatalog extends CardGeneral {
+export class CardCatalog extends CardGeneral<ICardCatalog> {
     private _categoryElement: HTMLElement;
     private _imageElement: HTMLImageElement;
 
     constructor(container: HTMLElement, onAction: () => void) {
         super(container);
+
         this._categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
         this._imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
@@ -19,12 +20,12 @@ export class CardCatalog extends CardGeneral {
         });
     }
 
-    set data(value: ICardCatalog) {
-        this.setImage(this._imageElement, value.image);
+    set image(value: string) {
+        this.setImage(this._imageElement, value);
+    }
 
-        this._categoryElement.textContent = value.category;
-        this._categoryElement.className = `card__category ${categoryMap[value.category as CategoryKey]}`;
+    set category(value: string) {
+        this._categoryElement.textContent = value;
+        this._categoryElement.className = `card__category ${categoryMap[value as CategoryKey]}`;
     }
 }
-
-
